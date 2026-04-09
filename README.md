@@ -26,84 +26,38 @@ figma-pixel-perfect/          # Repository root = Skill root
 
 ## Installation
 
-### Claude Code
+This skill follows the [Agent Skills](https://agentskills.io) open standard and can be installed via the `npx skills` CLI across all supported AI coding agents.
 
-Install directly from the GitHub URL:
+### Quick Install (Recommended)
 
 ```bash
-/skill install https://github.com/codefunded/figma-pixel-perfect
+# Install for all supported agents (Claude Code, Codex, OpenCode, etc.)
+npx skills add codefunded/figma-pixel-perfect
+
+# Install for a specific agent only
+npx skills add codefunded/figma-pixel-perfect -a claude-code
+
+# Install globally (available across all projects)
+npx skills add codefunded/figma-pixel-perfect -g
+
+# Preview what will be installed without installing
+npx skills add codefunded/figma-pixel-perfect --list
 ```
 
-Or clone and symlink manually:
+### Managing Skills
 
 ```bash
-git clone https://github.com/codefunded/figma-pixel-perfect.git
-mkdir -p .claude/skills
-ln -s "$(pwd)/figma-pixel-perfect" .claude/skills/figma-pixel-perfect
-```
+# List installed skills
+npx skills list
 
-### VS Code (GitHub Copilot / Claude Extension)
+# Check for updates
+npx skills check
 
-VS Code uses `.github/copilot-instructions.md` and `*.instructions.md` files for custom instructions:
+# Update to latest version
+npx skills update
 
-```bash
-git clone https://github.com/codefunded/figma-pixel-perfect.git
-
-# Main instructions (always active)
-cp figma-pixel-perfect/SKILL.md .github/copilot-instructions.md
-
-# Reusable prompt for on-demand use
-mkdir -p .github/prompts
-cp figma-pixel-perfect/workflow.md .github/prompts/figma-pixel-perfect.prompt.md
-
-# Reference docs (loaded by the AI when needed)
-mkdir -p docs/design-system-skill
-cp figma-pixel-perfect/*.md docs/design-system-skill/
-```
-
-The AI automatically discovers `.github/copilot-instructions.md` and applies the rules. Use `.github/prompts/*.prompt.md` as on-demand workflows via the `/` prompt menu.
-
-### Cursor
-
-Cursor uses `.cursorrules` (project root) and `.cursor/rules/*.md` files:
-
-```bash
-git clone https://github.com/codefunded/figma-pixel-perfect.git
-
-# Option A: Single .cursorrules file (always active)
-cp figma-pixel-perfect/SKILL.md .cursorrules
-
-# Option B: Modular rules in .cursor/rules/ (recommended)
-mkdir -p .cursor/rules
-cp figma-pixel-perfect/SKILL.md .cursor/rules/figma-pixel-perfect.md
-cp figma-pixel-perfect/component-patterns.md .cursor/rules/component-patterns.md
-cp figma-pixel-perfect/lessons-learned.md .cursor/rules/lessons-learned.md
-cp figma-pixel-perfect/accessibility-rules.md .cursor/rules/accessibility-rules.md
-```
-
-Cursor automatically loads `.cursorrules` from the project root and any `.md` files in `.cursor/rules/`.
-
-### Windsurf / Other AI Editors
-
-Copy the SKILL.md content into your editor's instruction file:
-
-| Editor | Target File |
-|--------|-------------|
-| Windsurf | `.windsurfrules` |
-| Aider | `.aider.conf.yml` (conventions section) |
-| Continue.dev | `.continuerc.json` (customInstructions) |
-| Generic | `AGENTS.md` or `CLAUDE.md` in project root |
-
-```bash
-cp figma-pixel-perfect/SKILL.md .windsurfrules  # or your editor's equivalent
-```
-
-### Universal: AGENTS.md (Works Everywhere)
-
-If your editor supports `AGENTS.md` (Claude Code, VS Code with Claude, and others):
-
-```bash
-ln -s figma-pixel-perfect/SKILL.md AGENTS.md
+# Remove the skill
+npx skills remove figma-pixel-perfect
 ```
 
 ## Quick Start
@@ -223,33 +177,11 @@ Look at the `version` field in your local `SKILL.md`:
 head -5 SKILL.md  # or wherever you installed the skill
 ```
 
-### Update Methods
+### Update
 
-**If you installed via git clone or symlink:**
 ```bash
-cd path/to/figma-pixel-perfect
-git pull origin main
+npx skills update
 ```
-
-**If you copied files into `.claude/skills/`, `.cursor/rules/`, or `.github/`:**
-Re-run the installation steps from the [Installation](#installation) section to overwrite with the latest version.
-
-**If you installed via `/skill install`:**
-```bash
-/skill install https://github.com/codefunded/figma-pixel-perfect
-```
-This overwrites the existing skill with the latest version from `main`.
-
-### Pin to a Specific Version
-
-To pin to a stable release instead of tracking `main`:
-```bash
-git clone https://github.com/codefunded/figma-pixel-perfect.git
-cd figma-pixel-perfect
-git checkout v1.0.0  # or any tagged release
-```
-
-Browse available versions: [GitHub Releases](https://github.com/codefunded/figma-pixel-perfect/releases)
 
 ### Version Policy
 

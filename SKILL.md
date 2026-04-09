@@ -126,8 +126,8 @@ See [lessons-learned.md](lessons-learned.md) before starting any new component. 
 ## Quick Start
 
 ```bash
-# 1. Install the skill from GitHub
-/skill install https://github.com/codefunded/figma-pixel-perfect
+# 1. Install the skill
+npx skills add codefunded/figma-pixel-perfect
 
 # 2. Ensure Figma MCP is configured in your IDE
 
