@@ -8,65 +8,74 @@ A Claude Code skill that generates a pixel-perfect, accessible, dark-mode-ready 
 - **Node.js 20+** — Required for Next.js 16+, Storybook 10+, and modern dependency resolution. Use `nvm install 22` if needed.
 - **npm** — For package installation and publishing.
 
-## Installation
+## Repository Structure
 
-All methods start by cloning this repository (or adding it as a Git submodule):
+All skill files live at the **root** of this repository:
 
-```bash
-git clone https://github.com/codefunded/figma-pixel-perfect.git
 ```
+figma-pixel-perfect/          # Repository root = Skill root
+├── SKILL.md                  # Entry point (Claude Code loads this)
+├── README.md                 # This file
+├── CHANGELOG.md              # Version history
+├── workflow.md               # Pipeline reference
+├── component-patterns.md     # Component templates
+├── accessibility-rules.md    # WCAG AAA rules
+├── storybook-conventions.md  # Storybook conventions
+└── lessons-learned.md        # Common mistakes & corrections
+```
+
+## Installation
 
 ### Claude Code
 
-Install the skill directly from the GitHub URL:
+Install directly from the GitHub URL:
 
 ```bash
-/skill install https://github.com/codefunded/figma-pixel-perfect/tree/main/skills/figma-pixel-perfect
+/skill install https://github.com/codefunded/figma-pixel-perfect
 ```
 
-Or add manually to your project's `.claude/skills/` directory:
+Or clone and symlink manually:
 
 ```bash
+git clone https://github.com/codefunded/figma-pixel-perfect.git
 mkdir -p .claude/skills
-ln -s $(pwd)/figma-pixel-perfect .claude/skills/figma-pixel-perfect
+ln -s "$(pwd)/figma-pixel-perfect" .claude/skills/figma-pixel-perfect
 ```
 
 ### VS Code (GitHub Copilot / Claude Extension)
 
-VS Code uses `.github/copilot-instructions.md` and `*.instructions.md` files for custom instructions. To integrate this skill:
-
-1. Copy the skill content into your project's instruction files:
+VS Code uses `.github/copilot-instructions.md` and `*.instructions.md` files for custom instructions:
 
 ```bash
-mkdir -p .github/prompts
+git clone https://github.com/codefunded/figma-pixel-perfect.git
+
 # Main instructions (always active)
 cp figma-pixel-perfect/SKILL.md .github/copilot-instructions.md
+
 # Reusable prompt for on-demand use
+mkdir -p .github/prompts
 cp figma-pixel-perfect/workflow.md .github/prompts/figma-pixel-perfect.prompt.md
-```
 
-2. Place reference docs where the AI can access them:
-
-```bash
+# Reference docs (loaded by the AI when needed)
 mkdir -p docs/design-system-skill
 cp figma-pixel-perfect/*.md docs/design-system-skill/
 ```
 
-The AI will automatically discover `.github/copilot-instructions.md` and apply the rules. Use `.github/prompts/*.prompt.md` files as on-demand workflows via the `/` prompt menu.
+The AI automatically discovers `.github/copilot-instructions.md` and applies the rules. Use `.github/prompts/*.prompt.md` as on-demand workflows via the `/` prompt menu.
 
 ### Cursor
 
 Cursor uses `.cursorrules` (project root) and `.cursor/rules/*.md` files:
 
-1. Copy the skill as a Cursor rule:
-
 ```bash
+git clone https://github.com/codefunded/figma-pixel-perfect.git
+
 # Option A: Single .cursorrules file (always active)
 cp figma-pixel-perfect/SKILL.md .cursorrules
 
 # Option B: Modular rules in .cursor/rules/ (recommended)
 mkdir -p .cursor/rules
-cp figma-pixel-perfect/SKILL.md .cursor/rules/figma-design-system.md
+cp figma-pixel-perfect/SKILL.md .cursor/rules/figma-pixel-perfect.md
 cp figma-pixel-perfect/component-patterns.md .cursor/rules/component-patterns.md
 cp figma-pixel-perfect/lessons-learned.md .cursor/rules/lessons-learned.md
 cp figma-pixel-perfect/accessibility-rules.md .cursor/rules/accessibility-rules.md
@@ -76,18 +85,22 @@ Cursor automatically loads `.cursorrules` from the project root and any `.md` fi
 
 ### Windsurf / Other AI Editors
 
-Most AI-powered editors support a project-level instructions file. Copy the SKILL.md content into your editor's equivalent:
+Copy the SKILL.md content into your editor's instruction file:
 
-| Editor | File |
-|--------|------|
+| Editor | Target File |
+|--------|-------------|
 | Windsurf | `.windsurfrules` |
 | Aider | `.aider.conf.yml` (conventions section) |
 | Continue.dev | `.continuerc.json` (customInstructions) |
 | Generic | `AGENTS.md` or `CLAUDE.md` in project root |
 
+```bash
+cp figma-pixel-perfect/SKILL.md .windsurfrules  # or your editor's equivalent
+```
+
 ### Universal: AGENTS.md (Works Everywhere)
 
-If your editor supports `AGENTS.md` (Claude Code, VS Code with Claude, and others), simply symlink:
+If your editor supports `AGENTS.md` (Claude Code, VS Code with Claude, and others):
 
 ```bash
 ln -s figma-pixel-perfect/SKILL.md AGENTS.md
@@ -223,7 +236,7 @@ Re-run the installation steps from the [Installation](#installation) section to 
 
 **If you installed via `/skill install`:**
 ```bash
-/skill install https://github.com/codefunded/figma-pixel-perfect/tree/main/skills/figma-pixel-perfect
+/skill install https://github.com/codefunded/figma-pixel-perfect
 ```
 This overwrites the existing skill with the latest version from `main`.
 
