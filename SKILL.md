@@ -20,14 +20,11 @@ Generate a pixel-perfect, accessible, dark-mode-ready React component library fr
 Before starting, verify ALL of the following:
 
 ### 1. Figma MCP Connected
-Run a test call to confirm the Figma MCP is connected:
+A Figma MCP server must be running and connected in your IDE. The user provides an authorized Figma file URL — the MCP handles authentication and file access. Test the connection with:
 ```
 use_figma({ fileKey: "<key>", code: "return figma.root.children.map(p => p.name)" })
 ```
-If this fails, instruct the user to:
-- Open Figma Desktop app
-- Ensure the file is open
-- Check MCP server connection in their IDE settings
+If this fails, check that the Figma MCP server is configured and running in your IDE settings.
 
 ### 2. Node.js >= 20
 ```bash
@@ -131,8 +128,7 @@ npx skills add codefunded/figma-pixel-perfect
 
 # 2. Ensure Figma MCP is configured in your IDE
 
-# 3. Run with a Figma file URL
-# In Claude Code, paste your Figma URL and say:
+# 3. Paste your Figma URL into your AI editor and say:
 # "Build a design system component library from this Figma file"
 ```
 

@@ -73,12 +73,12 @@ These lessons are organized by category. Some are universal (apply to any Figma 
 
 **What goes wrong:** `get_screenshot` or `use_figma` calls fail with `net::ERR_FAILED`.
 
-**Why it happens:** Network connectivity to Figma, Figma Desktop app not running, file not open, or temporary API issues.
+**Why it happens:** Network connectivity issues, Figma MCP server not running, invalid file key, or temporary API issues.
 
 **Correct approach:** 
 - Retry once after a short pause
 - If screenshots fail, fall back to `use_figma` plugin API for data extraction (more reliable)
-- If `use_figma` also fails, ask the user to verify Figma Desktop is running and the file is open
+- If `use_figma` also fails, ask the user to verify the Figma MCP server is running and the file URL is valid
 - Cache extracted data so you don't need to re-fetch on every iteration
 
 **Detection:** Errors containing `net::ERR_FAILED`, `502`, or timeout messages.
