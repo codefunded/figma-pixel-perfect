@@ -125,7 +125,7 @@ Use `[font-family:'FontName',sans-serif]` (arbitrary property syntax), never `fo
 
 **Why it happens:** `rounded-lg` resolves via the Tailwind theme's `--radius-lg` variable. If you've customized the theme, it may not match the Figma value. Or the default shadcn theme sets it differently.
 
-**Correct approach:** Always use explicit pixel values: `rounded-[8px]`, `rounded-[10px]`, `rounded-[16px]`. Never rely on named radius utilities for design-system-critical values.
+**Correct approach:** Always use the exact pixel value from Figma: `rounded-[Xpx]` where X is the Figma cornerRadius value. Do not copy example values from this guide — extract the real value. Different design systems use different radii (4px, 8px, 10px, 12px, 16px). Never rely on named radius utilities for design-system-critical values.
 
 **Detection:** `preview_inspect` shows a different border-radius than expected.
 

@@ -4,6 +4,8 @@ An AI coding skill that generates a pixel-perfect, accessible, dark-mode-ready R
 
 Give it a Figma URL — it extracts design tokens, scaffolds a Next.js + Tailwind + shadcn/ui project, generates every component with Storybook docs, verifies pixel fidelity, and outputs an npm-publishable package with WCAG AAA accessibility.
 
+Works for both **standalone npm packages** and **app-local design systems** — you choose the scope.
+
 ## Prerequisites
 
 - **Figma MCP** — a Figma MCP server running and connected in your IDE.

@@ -281,6 +281,8 @@ Usage:
 
 ## Radix Primitive Usage
 
+**shadcn supports both Radix UI and Base UI** as primitive layers. This guide shows Radix patterns (the default). If you initialized with `--base base-ui`, adapt the import paths and composition patterns accordingly. The component structure (CVA variants, `cn()`, `forwardRef`) remains the same regardless of the primitive layer.
+
 ### Dialog/Modal Pattern
 
 ```tsx

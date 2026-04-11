@@ -40,6 +40,8 @@ Call it on the root or a top-level frame to get a comprehensive overview of the 
 
 **When to fall back to `use_figma`:** Use `use_figma` plugin API scripts only when `get_design_context` doesn't provide enough detail — for example, extracting fills from deeply nested nodes, reading `componentPropertyDefinitions` on component sets, iterating over local paint/text styles, or accessing Figma variables. For standard extraction of layout, typography, colors, and spacing, `get_design_context` is faster, more reliable, and returns pre-structured data.
 
+**Variable API fragility:** Figma variable/token APIs (`get_variable_defs`, `getLocalVariableCollectionsAsync`) may require specific node context or fail silently. If variable extraction fails, fall back to `get_design_context` which returns resolved token values inline with each node. Extract the color/spacing/radius values directly from the design context output — this is often more reliable than querying variable definitions separately.
+
 ### 1.3 List All Top-Level Frames (Component Inventory)
 
 If `get_design_context` on the root is too large, or you need the full page/frame inventory, run a `use_figma` call to enumerate every page and its top-level frames:

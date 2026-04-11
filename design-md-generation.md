@@ -8,9 +8,17 @@ DESIGN.md is a markdown file that captures a project's complete visual identity:
 
 ## When to Generate
 
-Generate DESIGN.md as the final step (Phase 7), after all components are built and verified. The file lives at the project root alongside CLAUDE.md or AGENTS.md.
+Generate DESIGN.md in **two passes**:
+1. **Draft in Phase 2** — after extracting tokens, write a skeleton DESIGN.md with colors, typography, and spacing. This serves as the reference during component building.
+2. **Finalize in Phase 7** — after all components are verified, update DESIGN.md with component stylings, elevation, do's/don'ts, and the agent prompt guide.
+
+This two-pass approach prevents DESIGN.md from being skipped as 'optional' and keeps the design spec in sync throughout the build.
+
+The file lives at the project root alongside CLAUDE.md or AGENTS.md.
 
 ## Required Sections
+
+**Important:** DESIGN.md uses hex values for documentation purposes — this is correct and expected. [SKILL.md Rule 2](SKILL.md) ('never hardcode hex') applies to **component source code** (`.tsx` files), not to DESIGN.md. DESIGN.md is a specification document, not executable code. Use exact hex values in color tables and component spec sections.
 
 DESIGN.md follows a 9-section structure. Each section must contain real, extracted values — never placeholders or generic descriptions.
 

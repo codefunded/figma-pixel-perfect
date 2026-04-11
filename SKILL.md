@@ -1,7 +1,7 @@
 ---
 name: figma-pixel-perfect
 version: 1.1.0
-description: Use when the user wants to generate a pixel-perfect design system npm library from a Figma file. Extracts theme tokens, colors, typography, and spacing via Figma MCP, scaffolds React components on shadcn/ui + Tailwind CSS + Radix UI, ensures WCAG AAA accessibility, supports light and dark mode, and generates Storybook documentation. Triggers on phrases like "build design system from Figma", "extract Figma theme", "generate component library from Figma", "create pixel-perfect components", "Figma to React", "design system from Figma file".
+description: Use when the user wants to generate a pixel-perfect design system npm library or app-local design system from a Figma file. Extracts theme tokens, colors, typography, and spacing via Figma MCP, scaffolds React components on shadcn/ui + Tailwind CSS + Radix UI, ensures WCAG AAA accessibility, supports light and dark mode, and generates Storybook documentation. Triggers on phrases like "build design system from Figma", "extract Figma theme", "generate component library from Figma", "create pixel-perfect components", "Figma to React", "design system from Figma file".
 ---
 
 # Figma to Design System Pipeline
@@ -20,11 +20,14 @@ Generate a pixel-perfect, accessible, dark-mode-ready React component library fr
 Before starting, verify ALL of the following:
 
 ### 1. Figma MCP Connected
-A Figma MCP server must be running and connected in your IDE. The user provides an authorized Figma file URL — the MCP handles authentication and file access. Test the connection with:
-```
-use_figma({ fileKey: "<key>", code: "return figma.root.children.map(p => p.name)" })
-```
-If this fails, check that the Figma MCP server is configured and running in your IDE settings.
+A Figma MCP server must be running and connected in your IDE. The user provides an authorized Figma file URL — the MCP handles authentication and file access. Test the connection with any available Figma MCP tool:
+- `get_design_context(fileKey="<key>", nodeId="0:1")` — returns node data
+- `get_screenshot(fileKey="<key>", nodeId="0:1")` — returns an image
+- `use_figma(fileKey="<key>", code="return figma.root.name")` — if plugin API is available
+
+Not all Figma MCP servers expose the same tools. `get_design_context` and `get_screenshot` are the most widely available.
+
+If all tools fail, check that the Figma MCP server is configured and running in your IDE settings.
 
 ### 2. Node.js >= 20
 ```bash
@@ -83,7 +86,7 @@ See [design-md-generation.md](design-md-generation.md) — generates a [DESIGN.m
 ## Critical Rules (Always Apply)
 
 ### 1. Never Trust Generated Output — Always Verify
-After building any component, inspect it in Storybook using `preview_inspect` to compare computed CSS (height, font-size, font-weight, color, border-radius, padding) against the Figma extraction data. Screenshots alone are insufficient — JPEG compression obscures color differences.
+After building any component, verify pixel fidelity by comparing computed CSS against Figma specs. **Default method:** Open Storybook in your browser, right-click → Inspect Element, and check computed styles (height, font-size, font-weight, color, border-radius, padding). **Enhanced method:** If a browser preview MCP is available (e.g., Claude Preview), use `preview_inspect` for automated CSS comparison. Screenshots alone are insufficient — JPEG compression obscures color differences.
 
 ### 2. Never Hardcode Hex Colors
 Every color MUST use a CSS variable from `globals.css`. Use `bg-background`, `text-foreground`, `border-border` — never `bg-[#FFFFFF]`, `text-[#242424]`, `border-[#CCCCCC]`. Hardcoded hex values break dark mode.
@@ -100,6 +103,8 @@ font-['Roboto',sans-serif]
 
 ### 4. Radix `asChild` Requires `forwardRef`
 Any component used as a child of a Radix trigger with `asChild` MUST use `React.forwardRef` and spread `...props`. Otherwise event handlers and `data-state` attributes are silently lost and the component appears broken.
+
+**Note:** This rule applies to Radix-based shadcn components. If your project uses Base UI (via `npx shadcn init --base base-ui`), Base UI uses a different composition model — check the Base UI docs for equivalent patterns.
 
 ### 5. Storybook Stories Must Be Stateful
 Never use static `args` for controlled value props (checked, value, selected). Always use `render` functions with `React.useState`. Static args don't update on interaction — components appear broken.
@@ -130,6 +135,15 @@ If legacy code or unrelated files cause build failures, exclude them in `tsconfi
 
 ### 12. Search for Existing Design System Components
 Before creating any component from scratch, call `search_design_system` to check if the Figma file already has reusable components. Import and extend matches instead of duplicating them. If the Figma file has a design system library, use it as the source of truth for tokens, patterns, and component structure.
+
+### 13. Wire Fonts Through `next/font` AND `@theme inline`
+`next/font/google` injects a CSS variable at runtime (e.g., `--font-geist-sans`). But Tailwind v4's `@theme inline` resolves at **parse time**, not runtime — so `--font-sans: var(--font-geist-sans)` won't work. Instead, use literal font names in `@theme inline`:
+```css
+@theme inline {
+  --font-sans: 'YourFont', ui-sans-serif, system-ui, sans-serif;
+}
+```
+Move the `next/font` variable className to `<html>`, not `<body>`. And load fonts separately in Storybook via `.storybook/preview-head.html` since `next/font` doesn't run there.
 
 ---
 
@@ -163,7 +177,7 @@ npx skills add codefunded/figma-pixel-perfect
 - **Next.js** (latest via `create-next-app@latest`) (scaffold framework)
 - **Tailwind CSS** >= 4 (styling)
 - **shadcn/ui** (component primitives)
-- **Radix UI** (accessibility primitives, unified `radix-ui` package)
+- **Radix UI or Base UI** (accessibility primitives — shadcn supports both)
 - **class-variance-authority** (variant management)
 - **Storybook** >= 10 (documentation)
 - **Figma MCP** (design extraction)
