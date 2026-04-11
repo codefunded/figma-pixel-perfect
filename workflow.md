@@ -205,6 +205,10 @@ use_figma({
 })
 ```
 
+### 1.8 Resolving Figma Spec Ambiguities
+
+**Resolving Figma spec ambiguities:** When `get_design_context` returns values that conflict with Figma variables (e.g., a node shows `cornerRadius: 8` but the design system variable `border_radius/large` resolves to `10`), prefer the variable/token value. Variables represent the design system's intent; raw node values may be overridden instances. Always check if a value is bound to a variable before using the raw number.
+
 ---
 
 ## Phase 2: Scaffold (Project Setup)
@@ -222,7 +226,20 @@ npx create-next-app@latest <project-name> \
   --turbopack
 ```
 
-### 2.2 Initialize shadcn
+### 2.2 Create .gitignore
+
+Create `.gitignore` BEFORE running `npm install`:
+```gitignore
+node_modules/
+dist/
+.next/
+out/
+storybook-static/
+*.tsbuildinfo
+.DS_Store
+```
+
+### 2.3 Initialize shadcn
 
 ```bash
 cd <project-name>
@@ -234,7 +251,14 @@ The `-d` flag runs non-interactively with defaults. This creates:
 - `src/lib/utils.ts` with `cn()` utility
 - `src/app/globals.css` with CSS variable theme
 
-### 2.3 Replace Default Theme in globals.css
+### 2.4 Install Tailwind CLI
+
+Ensure `@tailwindcss/cli` is installed alongside `tailwindcss`:
+```bash
+npm install -D tailwindcss @tailwindcss/cli
+```
+
+### 2.5 Replace Default Theme in globals.css
 
 Replace the generated CSS variables with tokens extracted from Figma:
 
@@ -277,7 +301,7 @@ Replace the generated CSS variables with tokens extracted from Figma:
 }
 ```
 
-### 2.4 Set Up @theme Inline Block
+### 2.6 Set Up @theme Inline Block
 
 Map CSS variables to Tailwind utilities:
 
@@ -308,7 +332,7 @@ Map CSS variables to Tailwind utilities:
 }
 ```
 
-### 2.5 Configure Storybook
+### 2.7 Configure Storybook
 
 Install Storybook:
 ```bash
@@ -369,18 +393,18 @@ export default preview;
 
 Note: `next/font` does NOT work in Storybook. You MUST load fonts via `<link>` in `preview-head.html`.
 
-### 2.6 Additional Project Files
+### 2.8 Additional Project Files
 
 #### .nvmrc
 ```
 22
 ```
 
-#### src/index.ts (barrel export)
+#### src/index.ts (barrel export — starts empty)
 ```typescript
-export { Button } from "./components/ui/button";
-export { Card, CardHeader, CardContent, CardFooter } from "./components/ui/card";
-// ... add each component as it's built
+export { cn } from './lib/utils';
+// Add component exports incrementally as each component is built in Phase 3.
+// Do NOT add exports for components that don't exist yet — TypeScript will fail.
 ```
 
 #### src/lib/tokens.ts
@@ -455,6 +479,8 @@ See [component-patterns.md](component-patterns.md) for detailed per-component pa
 ---
 
 ## Phase 4: Verify Pixel Fidelity
+
+**IMPORTANT: Automated builds (`next build`, `storybook build`) verify that code compiles — they do NOT verify pixel fidelity. You MUST open Storybook in a browser (or use `preview_inspect` if available) and visually compare each component against the Figma screenshot. Build passing ≠ design matching.**
 
 ### 4.1 Start Storybook
 
@@ -631,7 +657,10 @@ Ensure `package.json` has:
   "main": "src/index.ts",
   "types": "src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
     "./globals.css": "./src/app/globals.css"
   },
   "files": [

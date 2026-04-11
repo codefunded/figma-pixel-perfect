@@ -380,3 +380,52 @@ If the user consistently uses Rosetta, install the alternate esbuild binary: `np
 ```
 
 **Detection:** Build error points to a file you didn't write or modify.
+
+---
+
+### Lesson: Barrel Export References Module Before It Exists
+**What goes wrong:** `src/index.ts` imports from `./components/button` before the component file is created. TypeScript fails immediately.
+**Why it happens:** The scaffold step creates the barrel export with all planned component paths, but components are built later in Phase 3. The build runs between phases and fails.
+**Correct approach:** Create the barrel export with ONLY the components that exist. Add exports incrementally as each component is built. Never reference a module that doesn't exist yet.
+**Detection:** `tsc` errors like `Cannot find module './components/button'` on a file you haven't created yet.
+
+---
+
+### Lesson: Tailwind CSS CLI Not on PATH
+**What goes wrong:** `npm run build` fails with `tailwindcss: command not found` even though `tailwindcss` is installed.
+**Why it happens:** The `tailwindcss` npm package is the library, not the CLI binary. The CLI is in `@tailwindcss/cli`. Without it, the `tailwindcss` command isn't available in npm scripts.
+**Correct approach:** Install both: `npm install tailwindcss @tailwindcss/cli`. Or use `npx tailwindcss` in scripts instead of bare `tailwindcss`.
+**Detection:** Build script fails with `command not found` for tailwindcss. Check if `@tailwindcss/cli` is in devDependencies.
+
+---
+
+### Lesson: package.json Exports Types Must Come First
+**What goes wrong:** TypeScript consumers can't resolve types from the published package. Bundlers warn that the `"types"` condition is unreachable.
+**Why it happens:** The `"types"` field is placed after `"import"` or `"require"` in the exports map. Bundlers evaluate conditions top-to-bottom and stop at the first match, so `"types"` never gets reached.
+**Correct approach:** Always put `"types"` first in the exports condition order:
+```json
+"exports": {
+  ".": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.js"
+  }
+}
+```
+**Detection:** TypeScript errors in consuming projects: `Could not find a declaration file for module`. Or bundler warnings about unreachable conditions.
+
+---
+
+### Lesson: Storybook Logs "use client" Warnings for Radix
+**What goes wrong:** Storybook/Vite logs warnings about `"use client"` directives being ignored in Radix UI components.
+**Why it happens:** `"use client"` is a React Server Components directive that only Next.js understands. Storybook uses Vite which doesn't process RSC directives. Radix components include `"use client"` at the top of every file.
+**Correct approach:** Ignore these warnings — they are expected and harmless. Do not try to "fix" them by removing `"use client"` from your components or suppressing Vite warnings. Document this in your project README so teammates don't file bugs.
+**Detection:** Console output shows `Module "..." has been externalized for browser compatibility...` or `"use client" was ignored`. These are safe to ignore.
+
+---
+
+### Lesson: Missing .gitignore in Scaffold
+**What goes wrong:** `node_modules/`, `dist/`, and `storybook-static/` get committed to git.
+**Why it happens:** The scaffold step creates project files but forgets the `.gitignore`. The agent doesn't think about git until the commit step.
+**Correct approach:** Create `.gitignore` as one of the FIRST scaffold files, before `npm install`. Include: `node_modules/`, `dist/`, `.next/`, `storybook-static/`, `.DS_Store`, `*.tsbuildinfo`.
+**Detection:** `git status` shows thousands of files in `node_modules/`.
