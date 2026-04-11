@@ -1,6 +1,6 @@
 ---
 name: figma-pixel-perfect
-version: 1.0.0
+version: 1.1.0
 description: Use when the user wants to generate a pixel-perfect design system npm library from a Figma file. Extracts theme tokens, colors, typography, and spacing via Figma MCP, scaffolds React components on shadcn/ui + Tailwind CSS + Radix UI, ensures WCAG AAA accessibility, supports light and dark mode, and generates Storybook documentation. Triggers on phrases like "build design system from Figma", "extract Figma theme", "generate component library from Figma", "create pixel-perfect components", "Figma to React", "design system from Figma file".
 ---
 
@@ -38,25 +38,45 @@ If using nvm: `nvm use 22` (or latest LTS)
 
 ---
 
+## Figma MCP Tools Reference
+
+These tools are provided by the Figma MCP server. They are available when the Figma MCP is connected in your IDE.
+
+| Tool | Purpose | Key Parameters |
+|------|---------|---------------|
+| `get_design_context` | Primary extraction tool. Returns structured layout, typography, colors, tokens, spacing for a node. | `fileKey`, `nodeId` |
+| `get_screenshot` | Returns a screenshot image of a Figma node for visual reference. | `fileKey`, `nodeId` |
+| `get_metadata` | Returns the node tree structure (names, types, IDs, positions). Use when `get_design_context` response is too large. | `fileKey`, `nodeId` |
+| `use_figma` | Executes JavaScript via the Figma Plugin API. Use for custom extraction when the above tools don't provide enough detail. | `fileKey`, `code`, `description` |
+| `search_design_system` | Searches for existing design system components in the Figma file. | query string |
+| `create_design_system_rules` | Generates project-specific AI agent rules for consistent Figma-to-code workflows. | `clientLanguages`, `clientFrameworks` |
+
+**Note:** `preview_inspect`, `preview_screenshot`, `preview_eval`, and `preview_click` are browser preview tools — they are NOT part of the Figma MCP. They are available when a local dev server (e.g., Storybook) is running and a browser preview MCP is connected. If unavailable, use manual browser DevTools inspection instead.
+
+---
+
 ## Pipeline Overview
 
 ### Phase 1: Extract (Figma Analysis)
-See [workflow.md §1 — Extract](#phase-1-extract)
+See [workflow.md — Phase 1](workflow.md)
 
 ### Phase 2: Scaffold (Project Setup)
-See [workflow.md §2 — Scaffold](#phase-2-scaffold)
+See [workflow.md — Phase 2](workflow.md)
 
 ### Phase 3: Generate Components
 See [component-patterns.md](component-patterns.md)
 
 ### Phase 4: Verify Pixel Fidelity
-See [workflow.md §4 — Verify](#phase-4-verify-pixel-fidelity)
+See [workflow.md — Phase 4](workflow.md)
 
 ### Phase 5: Dark Mode & Accessibility
 See [accessibility-rules.md](accessibility-rules.md)
 
 ### Phase 6: Storybook & Publish
 See [storybook-conventions.md](storybook-conventions.md)
+
+### Phase 7: Generate DESIGN.md
+See [design-md-generation.md](design-md-generation.md) — generates a [DESIGN.md](https://stitch.withgoogle.com/docs/design-md/overview/) file from the extracted tokens. This is the emerging standard for encoding design systems in agent-readable markdown. Drop it in your project root and any AI editor instantly understands your visual identity.
 
 ---
 
@@ -105,6 +125,12 @@ If legacy code or unrelated files cause build failures, exclude them in `tsconfi
 "exclude": ["node_modules", "src/lib/_elements"]
 ```
 
+### 11. Always Use `get_design_context` Before `use_figma`
+`get_design_context` is the primary extraction tool — it returns structured layout, typography, colors, and tokens. Use `use_figma` plugin API scripts only when `get_design_context` doesn't provide enough detail (e.g., extracting fills from deeply nested nodes or reading component property definitions). For standard extraction of layout, typography, colors, and spacing, `get_design_context` is faster, more reliable, and returns pre-structured data.
+
+### 12. Search for Existing Design System Components
+Before creating any component from scratch, call `search_design_system` to check if the Figma file already has reusable components. Import and extend matches instead of duplicating them. If the Figma file has a design system library, use it as the source of truth for tokens, patterns, and component structure.
+
 ---
 
 ## Common Mistakes to Avoid
@@ -134,7 +160,7 @@ npx skills add codefunded/figma-pixel-perfect
 
 ## Dependencies
 
-- **Next.js** >= 16 (scaffold framework)
+- **Next.js** (latest via `create-next-app@latest`) (scaffold framework)
 - **Tailwind CSS** >= 4 (styling)
 - **shadcn/ui** (component primitives)
 - **Radix UI** (accessibility primitives, unified `radix-ui` package)

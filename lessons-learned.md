@@ -57,6 +57,30 @@ These lessons are organized by category. Some are universal (apply to any Figma 
 
 ---
 
+### Lesson: Used `use_figma` When `get_design_context` Would Have Been Faster
+
+**What goes wrong:** Writing custom plugin API scripts to extract properties that `get_design_context` already returns in structured form.
+
+**Why it happens:** `use_figma` feels more powerful and flexible, so agents default to it. But for standard extraction (layout, typography, colors, spacing), `get_design_context` is faster, more reliable, and returns pre-structured data.
+
+**Correct approach:** Always try `get_design_context` first. If the response is truncated or missing specific details, then use `use_figma` for targeted extraction.
+
+**Detection:** You're writing a multi-line `use_figma` script to extract fills, fonts, and padding — all of which `get_design_context` already returns.
+
+---
+
+### Lesson: Ignored Existing Design System Components in Figma
+
+**What goes wrong:** Building components from scratch when the Figma file already has a design system with reusable components that could be imported.
+
+**Why it happens:** The agent jumps straight into building without checking what's already available.
+
+**Correct approach:** Call `search_design_system` before creating any component. If matches exist, use them as the source of truth for tokens, patterns, and structure.
+
+**Detection:** The Figma file has a "Components" page or design system library, and you haven't called `search_design_system`.
+
+---
+
 ### Lesson: Extract the Right Node — Not Its Parent
 
 **What goes wrong:** Getting wrong dimensions/radius because the extraction targeted a wrapper frame instead of the actual component element. For example, extracting border-radius from an input's container frame (10px) when the input field itself has 8px.
@@ -89,16 +113,7 @@ These lessons are organized by category. Some are universal (apply to any Figma 
 
 ### Lesson: `font-[]` Arbitrary Value Conflicts with `font-medium`
 
-**What goes wrong:** Using `font-['Roboto',sans-serif]` alongside `font-medium` causes one to override the other. Text appears in the wrong font or wrong weight.
-
-**Why it happens:** In Tailwind CSS v4, `font-*` is overloaded — both `font-family` and `font-weight` use the `font-` prefix. When both appear in a class string, the later one wins.
-
-**Correct approach:** Use the arbitrary PROPERTY syntax for font-family:
-```
-✅ [font-family:'Roboto',sans-serif] font-medium
-❌ font-['Roboto',sans-serif] font-medium
-```
-Or define the font in `@theme inline` as `--font-sans` and use `font-sans`.
+Use `[font-family:'FontName',sans-serif]` (arbitrary property syntax), never `font-['FontName',sans-serif]` (arbitrary value syntax). See [SKILL.md Rule 3](SKILL.md) for details.
 
 **Detection:** Inspect computed `font-family` or `font-weight` — one will be wrong. This is a SYSTEMIC issue affecting every file — if you find it in one component, grep for it across all.
 
@@ -118,11 +133,7 @@ Or define the font in `@theme inline` as `--font-sans` and use `font-sans`.
 
 ### Lesson: Never Hardcode Hex Colors
 
-**What goes wrong:** Components look correct in light mode but break completely in dark mode — white cards on dark backgrounds, invisible text, broken borders.
-
-**Why it happens:** Using `bg-[#FFFFFF]`, `text-[#242424]`, `border-[#CCCCCC]` instead of CSS variables. These values are static and don't respond to the `.dark` class.
-
-**Correct approach:** Define ALL colors as CSS variables in `globals.css` with light/dark variants. Use Tailwind utility classes that reference these variables: `bg-background`, `text-foreground`, `border-border`, `bg-surface`, `text-muted-foreground`, etc.
+Every color must use a CSS variable. Hardcoded hex values break dark mode. See [SKILL.md Rule 2](SKILL.md) for details.
 
 **Detection:** Toggle dark mode — any element that stays the same color has a hardcoded value. Audit with:
 ```bash
@@ -133,11 +144,7 @@ grep -rn "bg-\[#\|text-\[#\|border-\[#" src/components/ui/
 
 ### Lesson: SVG Icons Must Use `currentColor`
 
-**What goes wrong:** SVG icons remain dark/black in dark mode, becoming invisible against dark backgrounds.
-
-**Why it happens:** SVG elements have `stroke="#242424"` or `fill="#767676"` hardcoded in the JSX.
-
-**Correct approach:** Always use `stroke="currentColor"` and `fill="currentColor"`. Control the color via the parent element's text color class.
+Never hardcode `stroke` or `fill` hex values in SVGs — use `currentColor` so icons adapt to dark mode. See [SKILL.md Rule 7](SKILL.md) for details.
 
 **Detection:** Dark mode toggle makes icons invisible. Audit with:
 ```bash

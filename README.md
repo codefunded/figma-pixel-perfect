@@ -72,9 +72,16 @@ my-design-system/
 
 ## Publish to npm
 
+The generated library ships TypeScript source files. Consumers need a compatible bundler (Next.js, Vite, etc.) to import them directly. For broader compatibility, add a build step:
+
 ```bash
-npx next build && npx storybook build   # verify
-npm publish --access public              # publish
+# Option A: Ship TypeScript source (consumers must support .tsx imports)
+npm publish --access public
+
+# Option B: Add a build step for compiled output
+npm install -D tsup
+npx tsup src/index.ts --format esm,cjs --dts
+# Then update package.json "exports" to point to dist/
 ```
 
 Consumers install with:
@@ -101,12 +108,13 @@ npx skills remove figma-pixel-perfect  # uninstall
 
 | Document | What's inside |
 |---|---|
-| [SKILL.md](SKILL.md) | Trigger conditions, prerequisites, 10 critical rules |
-| [workflow.md](workflow.md) | 6-phase pipeline: extract → scaffold → generate → verify → a11y → finalize |
+| [SKILL.md](SKILL.md) | Trigger conditions, prerequisites, 12 critical rules |
+| [workflow.md](workflow.md) | 7-phase pipeline: extract → scaffold → generate → verify → a11y → finalize → DESIGN.md |
 | [component-patterns.md](component-patterns.md) | Component templates, CVA mapping, Radix primitives, unified input standard |
 | [accessibility-rules.md](accessibility-rules.md) | WCAG AAA, contrast ratios, ARIA, keyboard nav, reduced motion |
 | [storybook-conventions.md](storybook-conventions.md) | Story format, stateful patterns, dark mode toggle |
-| [lessons-learned.md](lessons-learned.md) | 30 documented mistakes and how to avoid them |
+| [design-md-generation.md](design-md-generation.md) | Generate DESIGN.md — the agent-readable design system standard |
+| [lessons-learned.md](lessons-learned.md) | Common mistakes and how to avoid them |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
 
 ## Contributing

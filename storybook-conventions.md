@@ -315,6 +315,8 @@ export default preview;
 
 ## preview-head.html for Font Loading
 
+**Replace `'Roboto'` with the actual font extracted from the Figma design.** Roboto is used here as an example. Always extract the real font from Figma before scaffolding.
+
 `next/font` does NOT work in Storybook. You must load fonts via a `<link>` tag in `.storybook/preview-head.html`:
 
 ```html

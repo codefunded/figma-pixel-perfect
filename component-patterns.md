@@ -4,6 +4,24 @@ How to build each type of component in the design system.
 
 ---
 
+## Check for Existing Design System Components First
+
+Before creating ANY component from scratch, call `search_design_system` to check if the Figma file already has a design system with reusable components:
+
+```
+search_design_system({ fileKey: "<key>", query: "Button" })
+```
+
+If matches are found:
+- Use the existing design system components as the **source of truth** for tokens, patterns, and structure
+- Import reusable components via `importComponentByKeyAsync(key)` or `importComponentSetByKeyAsync(key)` in `use_figma` scripts
+- Extract tokens (colors, typography, spacing) from these components rather than re-deriving them from individual frames
+- Extend and customize the matched components rather than duplicating them
+
+This avoids duplicating existing design system work and ensures consistency with the Figma file's established patterns.
+
+---
+
 ## Standard Component Template
 
 Every component follows this structure:
@@ -139,24 +157,9 @@ const buttonVariants = cva(
 
 ### Radix primitives to use:
 
-| Component | Radix Primitive |
-|---|---|
-| Accordion | `@radix-ui/react-accordion` |
-| Dialog/Modal | `@radix-ui/react-dialog` |
-| Dropdown Menu | `@radix-ui/react-dropdown-menu` |
-| Popover | `@radix-ui/react-popover` |
-| Tabs | `@radix-ui/react-tabs` |
-| Toggle | `@radix-ui/react-toggle` |
-| Toggle Group | `@radix-ui/react-toggle-group` |
-| Tooltip | `@radix-ui/react-tooltip` |
-| Checkbox | `@radix-ui/react-checkbox` |
-| Radio Group | `@radix-ui/react-radio-group` |
-| Select | `@radix-ui/react-select` |
-| Switch | `@radix-ui/react-switch` |
-| Slider | `@radix-ui/react-slider` |
-| Progress | `@radix-ui/react-progress` |
+Import from the unified `radix-ui` package: `import { Dialog as DialogPrimitive } from "radix-ui"`
 
-Note: With the unified `radix-ui` package, you can import from `radix-ui` directly instead of individual packages.
+Available primitives: Accordion, Dialog, DropdownMenu, Popover, Tabs, Toggle, ToggleGroup, Tooltip, Checkbox, RadioGroup, Select, Switch, Slider, Progress.
 
 ---
 
@@ -182,7 +185,7 @@ ALL input-type components MUST share these exact properties for visual consisten
 | Helper text | 12px, muted-foreground | `text-[12px] text-muted-foreground` |
 | Error text | 12px, destructive | `text-[12px] text-destructive` |
 | Padding horizontal | 12px | `px-3` |
-| Font family | Design system font | `[font-family:'Roboto',sans-serif]` |
+| Font family | Design system font (replace `'Roboto'` with the actual Figma font) | `[font-family:'Roboto',sans-serif]` |
 
 Components that must follow this standard:
 - Input
@@ -281,7 +284,7 @@ Usage:
 ### Dialog/Modal Pattern
 
 ```tsx
-import * as DialogPrimitive from "radix-ui/react-dialog";
+import { Dialog as DialogPrimitive } from "radix-ui";
 
 const Modal = ({ children, ...props }) => (
   <DialogPrimitive.Root {...props}>{children}</DialogPrimitive.Root>
@@ -315,7 +318,7 @@ const ModalContent = React.forwardRef<
 ### Popover Pattern
 
 ```tsx
-import * as PopoverPrimitive from "radix-ui/react-popover";
+import { Popover as PopoverPrimitive } from "radix-ui";
 
 const Popover = PopoverPrimitive.Root;
 const PopoverTrigger = PopoverPrimitive.Trigger;
@@ -395,8 +398,8 @@ className="bg-muted text-foreground border-border"
 
 ```css
 :root {
-  --success: oklch(0.55 0.15 145);
-  --success-foreground: oklch(1 0 0);
+  --success: #16A34A;
+  --success-foreground: #FFFFFF;
 }
 ```
 
@@ -405,6 +408,8 @@ Then use: `bg-success text-success-foreground`
 ---
 
 ## Font Family Arbitrary Property Syntax
+
+**Replace `'Roboto'` with the actual font extracted from the Figma design.** Roboto is used here as an example. Always extract the real font from Figma before scaffolding.
 
 In Tailwind CSS v4, the `font-` prefix is overloaded for both font-family and font-weight. Using `font-['Roboto',sans-serif]` conflicts with `font-medium`.
 

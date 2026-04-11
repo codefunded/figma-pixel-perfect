@@ -18,9 +18,31 @@ https://www.figma.com/design/ABC123xyz/My-Design-System?node-id=...
 
 The file key is the segment between `/design/` (or `/file/`) and the next `/`.
 
-### 1.2 List All Top-Level Frames (Component Inventory)
+### 1.2 Extract Design Data with `get_design_context` (Primary Tool)
 
-Run a `use_figma` call to enumerate every page and its top-level frames:
+`get_design_context` is the **primary extraction tool** — always use it before `use_figma`. It returns structured data including:
+
+- **Layout properties**: Auto Layout direction, constraints, sizing modes (hug/fixed/fill)
+- **Typography specs**: font family, size, weight, line height, letter spacing
+- **Color values and design tokens**: fills, strokes, effects with resolved values
+- **Component structure and variants**: component properties, variant definitions
+- **Spacing and padding**: padding (top/right/bottom/left), item spacing, gaps
+
+```
+get_design_context({ fileKey: "<key>", nodeId: "<node-id>" })
+```
+
+Call it on the root or a top-level frame to get a comprehensive overview of the design. If the response is too large (truncated), use this fallback strategy:
+
+1. Call `get_metadata` on the file to get the full node map with IDs
+2. Then call `get_design_context` on individual child nodes one at a time
+3. Aggregate the results
+
+**When to fall back to `use_figma`:** Use `use_figma` plugin API scripts only when `get_design_context` doesn't provide enough detail — for example, extracting fills from deeply nested nodes, reading `componentPropertyDefinitions` on component sets, iterating over local paint/text styles, or accessing Figma variables. For standard extraction of layout, typography, colors, and spacing, `get_design_context` is faster, more reliable, and returns pre-structured data.
+
+### 1.3 List All Top-Level Frames (Component Inventory)
+
+If `get_design_context` on the root is too large, or you need the full page/frame inventory, run a `use_figma` call to enumerate every page and its top-level frames:
 
 ```javascript
 use_figma({
@@ -39,7 +61,7 @@ use_figma({
 
 This gives you the full component inventory. Record frame names and IDs for later extraction.
 
-### 1.3 Extract Design Tokens
+### 1.4 Extract Design Tokens
 
 #### Colors
 ```javascript
@@ -104,7 +126,7 @@ use_figma({
 })
 ```
 
-### 1.4 Extract Component Variant Properties
+### 1.5 Extract Component Variant Properties
 
 For component sets (components with variants), extract the variant matrix:
 
@@ -131,7 +153,7 @@ use_figma({
 
 This reveals matrices like `Type=Primary, Size=Large, State=Default` which map directly to CVA variants.
 
-### 1.5 Get Screenshots for Reference
+### 1.6 Get Screenshots for Reference
 
 Use `get_screenshot` to capture individual components:
 
@@ -141,7 +163,7 @@ get_screenshot({ fileKey: "<key>", nodeId: "<node-id>" })
 
 Screenshots are useful for visual reference but NOT sufficient for pixel verification. JPEG compression alters colors. Always extract numerical values (fills, font-size, padding) programmatically.
 
-### 1.6 Extract Fills, Strokes, and Text Styles from Any Node
+### 1.7 Extract Fills, Strokes, and Text Styles from Any Node (Fallback)
 
 ```javascript
 use_figma({
@@ -224,33 +246,33 @@ Replace the generated CSS variables with tokens extracted from Figma:
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);           /* extracted from Figma */
-  --foreground: oklch(0.145 0 0);       /* extracted from Figma */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);          /* mapped from Figma primary */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.384 0 0); /* #595959 for AAA contrast */
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --background: #FFFFFF;                /* extracted from Figma */
+  --foreground: #242424;                /* extracted from Figma */
+  --card: #FFFFFF;
+  --card-foreground: #242424;
+  --primary: #333333;                   /* mapped from Figma primary */
+  --primary-foreground: #FAFAFA;
+  --secondary: #F5F5F5;
+  --secondary-foreground: #333333;
+  --muted: #F5F5F5;
+  --muted-foreground: #595959;          /* #595959 for AAA contrast */
+  --accent: #F5F5F5;
+  --accent-foreground: #333333;
+  --destructive: #DC2626;
+  --border: #E5E5E5;
+  --input: #E5E5E5;
+  --ring: #A3A3A3;
   --radius: 0.625rem;                   /* default from Figma */
 
   /* Custom tokens from Figma */
-  --success: oklch(0.55 0.15 145);
-  --warning: oklch(0.75 0.15 75);
-  --info: oklch(0.6 0.15 250);
+  --success: #16A34A;
+  --warning: #CA8A04;
+  --info: #2563EB;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
+  --background: #242424;
+  --foreground: #FAFAFA;
   /* ... all dark mode values ... */
 }
 ```
@@ -392,12 +414,25 @@ export const tokens = {
 
 ### Dispatch Strategy
 
-Build components in batches of 3 using parallel agents. Each agent receives:
+Build components in batches of 3. If your IDE supports parallel agent execution (e.g., Claude Code subagents, Cursor background tasks), dispatch each batch concurrently. Otherwise, build them sequentially. Each batch receives:
 1. Figma extraction data (fills, strokes, padding, typography, variant matrix)
 2. Design tokens (the CSS variables from globals.css)
 3. Target file paths (component.tsx + component.stories.tsx)
 4. The story format from storybook-conventions.md
 5. The component template from component-patterns.md
+
+### Asset Handling from Figma
+
+The Figma MCP server serves images, icons, and SVGs via localhost URLs. When `get_design_context` or `get_screenshot` returns asset URLs:
+
+1. **Download and use assets directly** — the MCP server provides localhost URLs for images, icons, and SVG exports. Download them and store in the project.
+2. **DO NOT import new icon packages** (e.g., `react-icons`, `heroicons`) if the Figma payload provides the actual asset files. Use what the design provides.
+3. **DO NOT use placeholder images or icons** if a localhost source URL is available from the MCP server. Always download and embed the real asset.
+4. **Storage locations:**
+   - Raster images (PNG, JPG, WebP) → `public/images/`
+   - SVG icons → `src/components/icons/` as React components, or `public/icons/` as static files
+   - Brand assets (logos, favicons) → `public/`
+5. **SVG optimization:** When downloading SVG assets, ensure they use `currentColor` for fills and strokes so they adapt to dark mode. If the downloaded SVG has hardcoded colors, replace them with `currentColor`.
 
 ### Priority Order
 
@@ -471,10 +506,22 @@ Test each interactive state:
 - **Clear**: Click clear buttons, verify input empties
 - **Open/Close**: Click dropdowns/modals, verify panel appears/disappears
 
-### 4.6 Fix Discrepancies
+### 4.6 Pixel Fidelity Checklist
+
+Run through this checklist for EVERY component before considering it complete:
+
+- [ ] **Layout matches** — spacing, alignment, and sizing match the Figma frame (Auto Layout direction, gap, padding)
+- [ ] **Typography matches** — font family, font size, font weight, and line height are identical to Figma
+- [ ] **Colors match exactly** — background, text, border, and accent colors match the Figma fills (compare hex values, not visual approximation)
+- [ ] **Interactive states work as designed** — hover, active, focus, and disabled states match their Figma variant counterparts
+- [ ] **Responsive behavior follows Figma constraints** — fill/hug/fixed sizing modes, min/max widths, and wrapping behavior
+- [ ] **Assets render correctly** — icons, images, and SVGs from the Figma file display at the right size and color
+- [ ] **Accessibility standards met** — ARIA labels, keyboard navigation, focus rings, and AAA contrast ratios
+
+### 4.7 Fix Discrepancies
 
 When a property doesn't match:
-1. Re-extract the specific value from Figma using `use_figma`
+1. Re-extract the specific value from Figma — try `get_design_context` first, fall back to `use_figma` for targeted extraction
 2. Update the component code
 3. Re-verify in Storybook
 
@@ -601,7 +648,26 @@ Ensure `package.json` has:
 }
 ```
 
-### 6.4 Final Checklist
+### 6.4 Generate Design System Rules
+
+Use the `create_design_system_rules` tool to generate project-specific rules that future Figma-to-code tasks will follow automatically. This tool is provided by the Figma MCP server (see [SKILL.md — Tool Reference](SKILL.md)).
+
+```
+create_design_system_rules({
+  clientLanguages: ["TypeScript"],
+  clientFrameworks: ["React", "Next.js", "Tailwind CSS"]
+})
+```
+
+This generates reusable content for `CLAUDE.md`, `AGENTS.md`, or `.cursorrules` files that encode:
+- The project's design token conventions (CSS variable naming, color format)
+- Component structure patterns (CVA variants, forwardRef, compound components)
+- Styling rules (Tailwind v4 syntax, arbitrary property syntax)
+- Accessibility requirements (AAA contrast, reduced motion, currentColor icons)
+
+Run this after the design system is complete so future development sessions maintain consistency.
+
+### 6.5 Final Checklist
 
 - [ ] All components have stories
 - [ ] All stories render without errors
