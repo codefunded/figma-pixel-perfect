@@ -128,6 +128,29 @@ use_figma({
 })
 ```
 
+### Quality Gate: Token Validation
+
+Before proceeding to scaffold, validate extracted tokens against known design system patterns:
+
+**Color check:**
+- Use exactly what the source design specifies. If the source uses pure #000000 for text, replicate it faithfully.
+- If the source doesn't define secondary/muted text colors, derive them: secondary at 60% opacity of primary, muted at 40%.
+- If the source has multiple accent colors for interactive elements, extract all of them — some designs intentionally use more than one.
+
+**Typography check:**
+- Extract the exact font sizes from the source. 16px body text is the industry standard — if the source uses a different baseline, follow the source.
+- If letter-spacing isn't specified in the source, use 0 (normal) for body and slight negative (-0.02em) for headlines 24px+.
+- If fewer than 6 size levels are found, the source may be a mockup, not a design system — extract what exists and add standard intermediate sizes only if needed.
+
+**Radius check:**
+- Extract the EXACT value from each component — radius varies widely between design systems and is brand-defining.
+- If only one radius value is found, apply it consistently. If none is found, use 8px as the industry default for inputs/cards.
+
+**Shadow check:**
+- If the source has shadows, extract the exact values including multi-layer stacks.
+- If the source has NO shadows, that's a valid design choice — don't add them.
+- If shadow values aren't extractable, use a standard 3-level scale: subtle (0 1px 3px rgba(0,0,0,0.08)), card (0 2px 8px rgba(0,0,0,0.12)), elevated (0 8px 24px rgba(0,0,0,0.16)).
+
 ### 1.5 Extract Component Variant Properties
 
 For component sets (components with variants), extract the variant matrix:
@@ -545,6 +568,15 @@ Run through this checklist for EVERY component before considering it complete:
 - [ ] **Responsive behavior follows Figma constraints** — fill/hug/fixed sizing modes, min/max widths, and wrapping behavior
 - [ ] **Assets render correctly** — icons, images, and SVGs from the Figma file display at the right size and color
 - [ ] **Accessibility standards met** — ARIA labels, keyboard navigation, focus rings, and AAA contrast ratios
+
+#### Design System Quality Checks
+- [ ] Text color matches the source design exactly
+- [ ] Accent/interactive colors match the source — extract all that are defined
+- [ ] Typography sizes match the source; if the source doesn't specify a full hierarchy, fill gaps with standard intermediate sizes
+- [ ] If the source doesn't specify letter-spacing, body uses 0 and headlines 24px+ use -0.02em
+- [ ] Border-radius matches extracted values exactly (not Tailwind defaults)
+- [ ] Shadow levels are consistent (not ad-hoc per component); if none in source, don't add them
+- [ ] Font weights match the source — don't default to bold (700) for headlines if the system uses medium (500)
 
 ### 4.7 Fix Discrepancies
 

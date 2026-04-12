@@ -1,6 +1,6 @@
 ---
 name: figma-pixel-perfect
-version: 1.1.0
+version: 1.2.0
 description: Use when the user wants to generate a pixel-perfect design system npm library or app-local design system from a Figma file. Extracts theme tokens, colors, typography, and spacing via Figma MCP, scaffolds React components on shadcn/ui + Tailwind CSS + Radix UI, ensures WCAG AAA accessibility, supports light and dark mode, and generates Storybook documentation. Triggers on phrases like "build design system from Figma", "extract Figma theme", "generate component library from Figma", "create pixel-perfect components", "Figma to React", "design system from Figma file".
 ---
 

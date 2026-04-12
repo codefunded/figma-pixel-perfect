@@ -2,6 +2,8 @@
 
 How to build each type of component in the design system.
 
+**When the source design is ambiguous or incomplete**, consult [design-system-patterns.md](design-system-patterns.md) for industry-standard defaults — color architecture, typography hierarchy, shadow systems, and common anti-patterns.
+
 ---
 
 ## Check for Existing Design System Components First
@@ -200,6 +202,12 @@ Components that must follow this standard:
 - TextMask
 - Search
 
+#### Input Quality Check
+- All input types must share identical height, border-radius, border-color, font-size, placeholder color, and focus ring
+- Placeholder text color must meet AAA contrast (7:1) — use #595959 minimum on white, not #767676
+- Focus ring should use the primary accent color with reduced opacity (typically 20%)
+- Label font size should be smaller than input text (typically 12-14px label vs 16px input)
+
 ---
 
 ## Button Pattern
@@ -226,6 +234,13 @@ For icon buttons, add `aria-label`:
   <X className="h-4 w-4" />
 </Button>
 ```
+
+#### Button Quality Check
+- Primary button should use the accent color from the source design
+- Ghost/outlined variant should have transparent or near-transparent background
+- All buttons should share the same height, padding, and radius within a size tier
+- Button text weight should match the system (most use 500, some use 400 — extract, don't assume)
+- Hover state should darken the accent — if the source doesn't specify a hover color, darken by 10-15%
 
 ---
 
@@ -276,6 +291,12 @@ Usage:
   </CardFooter>
 </Card>
 ```
+
+#### Card Quality Check
+- Border radius should match the extracted value exactly — radius varies widely between designs and is a defining visual characteristic
+- Shadow should use the system's elevation scale — NOT a single generic `shadow-md`
+- If the source uses shadow-as-border (`box-shadow: 0 0 0 1px rgba(...)`) instead of CSS borders, replicate that
+- Card padding and internal spacing should be extracted, not assumed
 
 ---
 

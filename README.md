@@ -110,6 +110,7 @@ npx skills remove figma-pixel-perfect  # uninstall
 
 | Document | What's inside |
 |---|---|
+| [design-system-patterns.md](design-system-patterns.md) | Industry-standard design system patterns and fallback defaults |
 | [SKILL.md](SKILL.md) | Trigger conditions, prerequisites, 12 critical rules |
 | [workflow.md](workflow.md) | 7-phase pipeline: extract → scaffold → generate → verify → a11y → finalize → DESIGN.md |
 | [component-patterns.md](component-patterns.md) | Component templates, CVA mapping, Radix primitives, unified input standard |
