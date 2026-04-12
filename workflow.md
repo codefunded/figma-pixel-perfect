@@ -497,7 +497,7 @@ The Figma MCP server serves images, icons, and SVGs via localhost URLs. When `ge
 3. Extract colors as CSS variable mappings
 4. Generate component with CVA variants
 5. Generate Storybook stories with stateful render functions
-6. Verify in Storybook (Phase 4)
+6. **Verify immediately** — run the Phase 4 visual comparison loop for this component NOW, before starting the next one. Fetch the source screenshot, open Storybook, compare side-by-side, and fix any discrepancies.
 
 See [component-patterns.md](component-patterns.md) for detailed per-component patterns.
 
@@ -507,20 +507,46 @@ See [component-patterns.md](component-patterns.md) for detailed per-component pa
 
 **IMPORTANT: Automated builds (`next build`, `storybook build`) verify that code compiles — they do NOT verify pixel fidelity. You MUST open Storybook in a browser (or use `preview_inspect` if available) and visually compare each component against the Figma screenshot. Build passing ≠ design matching.**
 
-### 4.1 Start Storybook
+### 4.1 Start Storybook and Fetch Source Screenshots
 
+**This is not optional — visual comparison is the core verification step.**
+
+1. Start Storybook:
 ```bash
 npx storybook dev -p 6006
 ```
 
-### 4.2 Navigate and Inspect
-
-For each component story, navigate to its iframe URL:
+2. For each component, get the source reference:
 ```
-http://localhost:6006/iframe.html?id=components-button--primary&viewMode=story
+get_screenshot(fileKey="<key>", nodeId="<component-node-id>")
 ```
+Keep this screenshot visible — it's the ground truth.
 
-Use `preview_inspect` on specific elements to get computed CSS properties.
+### 4.2 Side-by-Side Visual Comparison Loop
+
+For EVERY component, run this loop:
+
+1. **Open the component in Storybook** — navigate to the iframe URL:
+   ```
+   http://localhost:6006/iframe.html?id=components-button--primary&viewMode=story
+   ```
+
+2. **Take a Storybook screenshot** — use `preview_screenshot` if available, or view it manually in the browser.
+
+3. **Compare against the Figma screenshot** — look at both images and check:
+   - Does the overall shape and layout match?
+   - Are the proportions correct (height, width, padding)?
+   - Do the colors look the same (not just close — the same)?
+   - Is the typography visually identical (weight, size, spacing)?
+
+4. **Inspect computed CSS** — right-click → Inspect Element (or use `preview_inspect`) to verify exact values:
+   - height, padding, border-radius, font-size, font-weight, color, background-color
+
+5. **If anything doesn't match** → fix the component, reload Storybook, repeat from step 2.
+
+6. **Move to the next component** only when the current one is pixel-perfect.
+
+Do NOT batch-verify after building all components. Verify each component IMMEDIATELY after building it, before starting the next one.
 
 ### 4.3 Property-by-Property Comparison
 

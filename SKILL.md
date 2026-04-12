@@ -86,7 +86,7 @@ See [design-md-generation.md](design-md-generation.md) — generates a [DESIGN.m
 ## Critical Rules (Always Apply)
 
 ### 1. Never Trust Generated Output — Always Verify
-After building any component, verify pixel fidelity by comparing computed CSS against Figma specs. **Default method:** Open Storybook in your browser, right-click → Inspect Element, and check computed styles (height, font-size, font-weight, color, border-radius, padding). **Enhanced method:** If a browser preview MCP is available (e.g., Claude Preview), use `preview_inspect` for automated CSS comparison. Screenshots alone are insufficient — JPEG compression obscures color differences.
+After building any component, verify pixel fidelity by comparing computed CSS against Figma specs. **Default method:** Open Storybook in your browser, right-click → Inspect Element, and check computed styles (height, font-size, font-weight, color, border-radius, padding). **Enhanced method:** If a browser preview MCP is available (e.g., Claude Preview), use `preview_inspect` for automated CSS comparison. Screenshots alone are insufficient — JPEG compression obscures color differences. **The verification loop: for each component, fetch the source screenshot (Figma `get_screenshot`), open Storybook, and compare side-by-side. Fix discrepancies before moving to the next component. This is not a final phase — it happens after EVERY component.**
 
 ### 2. Never Hardcode Hex Colors
 Every color MUST use a CSS variable from `globals.css`. Use `bg-background`, `text-foreground`, `border-border` — never `bg-[#FFFFFF]`, `text-[#242424]`, `border-[#CCCCCC]`. Hardcoded hex values break dark mode.
